@@ -1,17 +1,35 @@
-//const httpCodes = [300, 302, 307, 301, 200, 666, 598];//
+//anti ddos program by dafa
 
-const readline = require("readline");
-const http = require('http');
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+
+const http =__importStar(require("http"));
 var blacklist = new Map();
-var visit = 0;
+const readline = require("readline");
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-
-const title = require("node-bash-title");
-title("GTPS HTTP (C) DaFa");
 
 rl.question("Enter password: ", function(password) {
     if (password === "http")
@@ -20,26 +38,23 @@ rl.question("Enter password: ", function(password) {
 
     console.clear();
 
-const server = http.createServer(function(req, res) {
-    let ip = req.connection.remoteAddress;
-    ip = ip.split(/::ffff:/g).filter(a => a).join('');
-    if (req.url == "/growtopia/server_data.php") {
-        if (req.url = "post") {
-            visit++;
-            res.write(`server|IPSERVER\nport|17091\ntype|1\n#maint|HTTP NodeJS\n\nbeta_server|127.0.0.1\nbeta_port|17091\n\nbeta_type|1\nmeta|CloudFlare\nRTENDMARKERBS1001`);
-            res.end();
-            console.log(`[LOGS]\n[!] IP: ${ip}\n[!] Method: ${req.method}\n[!]`);
-        }
+  //limitMemory
+  const { RateLimiterMemory } = require('rate-limiter-flexible');
+  const rateLimiter = new RateLimiterMemory({
+      points: 5, // 5 points
+      duration: 1 // per second
+    });
+
+const server = http.createServer(function (req, res) {
+    if (req.url === "/growtopia/server_data.php" && req.method.toLowerCase() === "post") {
+        res.writeHead(200, { 'Contect-Type': 'text/html' });
+        res.write(`server|YOURIP\nport|17091\ntype|1\n#maint|GTPS HTTP By DaFa\n\nbeta_server|127.0.0.1\nbeta_port|17091\nbeta_type|1\nmeta|localhost\nRTENDMARKERBS1001`);
+        res.end();
     }
-    else {
-        res.writeHead(307);
-        res.write(`<script>alert('HTTP BY DAFA');</script><pre>Your ip (${ip})\nGTPS HTTP (C) DaFa`)
-        res.end()
-        req.destroy();
-    }
-})
+}
 
 server.listen(80);
+
 function add_address(address) {
     blacklist.set(address, Date.now() + 5000);
 }
@@ -53,16 +68,13 @@ server.on("connection", function (socket) {
             blacklist.delete(socket.remoteAddress);
         }
         else
-            socket.destroy();
+        socket.destroy();
     }
 });
 
-console.log(`Setup HTTP...`);
-
 console.clear();
-
-console.log("HTTP (C) DaFa")
-}
+server.on("listening", function () { return console.log("[!] Servers Protected by DaFa"); });
+        }
 else
 {
     console.log("Wrong password")
